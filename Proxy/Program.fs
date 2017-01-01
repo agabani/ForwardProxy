@@ -4,8 +4,8 @@
 let main argv = 
     printfn "%A" argv
 
-    let disposable = Server.Server.Start(port = 8889)
-    Thread.Sleep(60 * 1000)
+    let disposable = Tcp.Server.Start(port = 8889)
+    Thread.Sleep(120 * 1000)
     disposable.Dispose()
 
     0

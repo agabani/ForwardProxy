@@ -1,4 +1,4 @@
-﻿module Server
+﻿module Tcp
 
 open System
 open System.IO
@@ -36,12 +36,14 @@ type Server()=
             let response = [|
                 "HTTP/1.1 200 OK\r\n"B
                 "Content-Type: text/plain\r\n"B
+                "Content-Length: 12\r\n"B 
                 "\r\n"B
                 "Hello World!"B|] |> Array.concat
 
             try
                 try
                     let! bytesSent = socket.AsyncSend(response)
+                    printfn "bytes sent %d" bytesSent
                     ()
                 with
                     e -> printfn "An error occurred: %s" e.Message
@@ -54,4 +56,3 @@ type Server()=
 
         Async.Start(loop(), cancellationToken = cts.Token)
         { new IDisposable with member x.Dispose() = cts.Cancel(); listener.Close() }
-
