@@ -6,10 +6,26 @@ open System.Linq
 open System.Net.Sockets
 open System.Text
 
+type Address = { Hostname : string; Port : int }
+
 type Header(array)=
-    member this.Array = array
-    member this.List  = Encoding.ASCII.GetString(array).Split([|"\r\n"|], StringSplitOptions.RemoveEmptyEntries)
-    member this.Verb  = this.List.First().Split(' ').First()
+    static let ContentLengthKey = "Content-Length:"
+    static let HostKey = "Host:"
+
+    member this.Array           : byte[]    = array
+    member this.List            : string[]  = Encoding.ASCII.GetString(array).Split([|"\r\n"|], StringSplitOptions.RemoveEmptyEntries)
+    member this.Verb            : string    = this.List.First().Split(' ').First()
+    member this.ContentLength   : int64     = 
+        let header = this.List.SingleOrDefault(fun string -> string.StartsWith(ContentLengthKey, StringComparison.OrdinalIgnoreCase))
+        match header with
+        | null -> 0L
+        | _ -> Int64.Parse(header.Substring(ContentLengthKey.Length).TrimStart())
+    member this.Host            : Address   =
+        let header = this.List.Single(fun string -> string.StartsWith(HostKey, StringComparison.OrdinalIgnoreCase)).Substring(HostKey.Length).TrimStart().Split(':')
+        match header.Length with
+        | 1 -> {Hostname = header.First(); Port = 80 }
+        | 2 -> {Hostname = header.First(); Port = Int32.Parse(header.Last())}
+        | _ -> raise (System.Exception("Invalid address."))
 
 type Stream()=
     static let Delimiter = [|'\r'B; '\n'B; '\r'B; '\n'B|]
