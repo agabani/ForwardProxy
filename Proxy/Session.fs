@@ -1,7 +1,9 @@
 ﻿module Session
 
+open System
 open System.Net
 open System.Net.Sockets
+open System.Text
 
 open Http
 open SocketExtensions
@@ -14,15 +16,18 @@ type Session()=
                 use networkStream = new NetworkStream(socket)
                 let header = Stream.GetHeader(networkStream)
 
+                let content = System.Text.Encoding.UTF8.GetString header.Array
                 let response = [|
-                    "HTTP/1.1 200 OK\r\n"B
-                    "Content-Type: text/plain\r\n"B
-                    "Content-Length: 12\r\n"B 
-                    "\r\n"B
-                    "Hello World!"B|] |> Array.concat
+                    "HTTP/1.1 200 OK"
+                    "Content-Type: text/plain"
+                    "Content-Length: " + content.Length.ToString()
+                    ""
+                    content
+                |]
 
-                let! bytesSent = socket.AsyncSend response
-                ()
+                let responseBytes = Encoding.ASCII.GetBytes(String.Join("\r\n", response))
+
+                let! bytesSent = socket.AsyncSend(responseBytes)
                 do! Async.Sleep 1000
             with
                 e -> printfn "An error occurred: %s" e.Message
