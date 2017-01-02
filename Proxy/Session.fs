@@ -3,6 +3,7 @@
 open System.Net
 open System.Net.Sockets
 
+open Http
 open SocketExtensions
 
 type Session()=
@@ -10,6 +11,9 @@ type Session()=
     
         try
             try
+                use networkStream = new NetworkStream(socket)
+                let header = Stream.GetHeader(networkStream)
+
                 let response = [|
                     "HTTP/1.1 200 OK\r\n"B
                     "Content-Type: text/plain\r\n"B

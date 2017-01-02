@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="SocketExtensions.fs" />
+    <Compile Include="Http.fs" />
     <Compile Include="Session.fs" />
     <Compile Include="Tcp.fs" />
     <Compile Include="Program.fs" />
